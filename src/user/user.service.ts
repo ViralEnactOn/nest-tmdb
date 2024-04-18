@@ -5,7 +5,6 @@ import {
 } from '@nestjs/common';
 import { InjectKysely } from 'nestjs-kysely';
 import { Database } from 'src/@types';
-import { User } from 'src/config/types';
 import { UserRegisterRequestDto } from './dto/user.register.req.dto';
 import { sha256 } from 'js-sha256';
 import { JwtService } from '@nestjs/jwt';

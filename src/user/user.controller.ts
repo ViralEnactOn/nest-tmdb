@@ -13,6 +13,7 @@ import {
 import { UserService } from './user.service';
 import {
   ApiBadRequestResponse,
+  ApiBearerAuth,
   ApiCreatedResponse,
   ApiTags,
 } from '@nestjs/swagger';
@@ -21,6 +22,7 @@ import { UserRegisterRequestDto } from './dto/user.register.req.dto';
 import { LocalAuthGuard } from './local-auth.guard';
 import { LoginDto } from './dto/login.dto';
 import session from 'express-session';
+import { JwtAuthGuard } from './jwt-auth.guard';
 
 @ApiTags('User')
 @Controller('user')
@@ -41,13 +43,15 @@ export class UserController {
 
   @UseGuards(LocalAuthGuard)
   @Post('login')
-  async login(
-    @Request() req,
-    @Body() loginDto: LoginDto,
-    @Session() session: Record<string, any>,
-  ): Promise<any> {
-    console.log({ session });
+  async login(@Request() req, @Body() loginDto: LoginDto): Promise<any> {
     return this.userService.generateToken(req.user);
+  }
+
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard)
+  @Get('detail')
+  async user(@Request() req): Promise<any> {
+    return req.user;
   }
 
   @Get('/logout')

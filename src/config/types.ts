@@ -1,8 +1,9 @@
-import type { ColumnType } from "kysely";
+import type { ColumnType } from 'kysely';
 
-export type Generated<T> = T extends ColumnType<infer S, infer I, infer U>
-  ? ColumnType<S, I | undefined, U>
-  : ColumnType<T, T | undefined, T>;
+export type Generated<T> =
+  T extends ColumnType<infer S, infer I, infer U>
+    ? ColumnType<S, I | undefined, U>
+    : ColumnType<T, T | undefined, T>;
 
 export interface Movie {
   adult: Generated<string | null>;
@@ -39,6 +40,7 @@ export interface User {
   isVerified: Generated<number | null>;
   name: Generated<string | null>;
   password: Generated<string | null>;
+  role: 'admin' | 'user';
   updated_at: Generated<Date>;
 }
 
