@@ -1,33 +1,21 @@
-import { Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { InjectKysely } from 'nestjs-kysely';
 import { Database } from 'src/@types';
 import { User } from 'src/config/types';
 import { UserRegisterRequestDto } from './dto/user.register.req.dto';
 import { sha256 } from 'js-sha256';
+import { JwtService } from '@nestjs/jwt';
 
 @Injectable()
 export class UserService {
-  constructor(@InjectKysely() private readonly db: Database) {}
-
-  create(createUserDto: User) {
-    return 'This action adds a new user';
-  }
-
-  findAll() {
-    return `This action returns all user`;
-  }
-
-  findOne(id: number) {
-    return `This action returns a #${id} user`;
-  }
-
-  update(id: number, updateUserDto: User) {
-    return `This action updates a #${id} user`;
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} user`;
-  }
+  constructor(
+    @InjectKysely() private readonly db: Database,
+    private jwtService: JwtService,
+  ) {}
 
   async doUserRegistration(userRegister: UserRegisterRequestDto) {
     const createUser: any = () => ({
@@ -49,5 +37,29 @@ export class UserService {
         .executeTakeFirst();
       return user;
     }
+  }
+
+  async validateUserCreds(email: string, password: string): Promise<any> {
+    const user = await this.db
+      .selectFrom('user')
+      .selectAll()
+      .where('email', '=', email)
+      .executeTakeFirst();
+
+    if (!user) throw new BadRequestException();
+
+    if (!(sha256(password) === user.password))
+      throw new UnauthorizedException();
+
+    return user;
+  }
+
+  generateToken(user: any) {
+    return {
+      access_token: this.jwtService.sign({
+        name: user.name,
+        sub: user.id,
+      }),
+    };
   }
 }

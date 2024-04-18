@@ -6,9 +6,11 @@ import {
   Patch,
   Param,
   Delete,
+  Request,
+  UseGuards,
+  Session,
 } from '@nestjs/common';
 import { UserService } from './user.service';
-import { User } from 'src/config/types';
 import {
   ApiBadRequestResponse,
   ApiCreatedResponse,
@@ -16,36 +18,14 @@ import {
 } from '@nestjs/swagger';
 import { SETTINGS } from 'src/app.utils';
 import { UserRegisterRequestDto } from './dto/user.register.req.dto';
+import { LocalAuthGuard } from './local-auth.guard';
+import { LoginDto } from './dto/login.dto';
+import session from 'express-session';
 
 @ApiTags('User')
 @Controller('user')
 export class UserController {
   constructor(private readonly userService: UserService) {}
-
-  @Post()
-  create(@Body() createUserDto: User) {
-    return this.userService.create(createUserDto);
-  }
-
-  @Get()
-  findAll() {
-    return this.userService.findAll();
-  }
-
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.userService.findOne(+id);
-  }
-
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateUserDto: User) {
-    return this.userService.update(+id, updateUserDto);
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.userService.remove(+id);
-  }
 
   @Post('/register')
   @ApiCreatedResponse({
@@ -57,5 +37,22 @@ export class UserController {
     userRegister: UserRegisterRequestDto,
   ) {
     return await this.userService.doUserRegistration(userRegister);
+  }
+
+  @UseGuards(LocalAuthGuard)
+  @Post('login')
+  async login(
+    @Request() req,
+    @Body() loginDto: LoginDto,
+    @Session() session: Record<string, any>,
+  ): Promise<any> {
+    console.log({ session });
+    return this.userService.generateToken(req.user);
+  }
+
+  @Get('/logout')
+  logout(@Request() req): any {
+    req.session.destroy();
+    return { msg: 'The user session has ended' };
   }
 }
