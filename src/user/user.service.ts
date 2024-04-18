@@ -8,6 +8,7 @@ import { Database } from 'src/@types';
 import { UserRegisterRequestDto } from './dto/user.register.req.dto';
 import { sha256 } from 'js-sha256';
 import { JwtService } from '@nestjs/jwt';
+import { User } from '@/config/types';
 
 @Injectable()
 export class UserService {
@@ -53,10 +54,12 @@ export class UserService {
     return user;
   }
 
-  generateToken(user: any) {
+  generateToken(user: User) {
     return {
       access_token: this.jwtService.sign({
         name: user.name,
+        role: user.role,
+        email: user.email,
         sub: user.id,
       }),
     };

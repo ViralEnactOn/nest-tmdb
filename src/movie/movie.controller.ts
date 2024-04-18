@@ -26,7 +26,6 @@ export class MovieController {
 
   @Get(':id')
   findOne(@Param('id') id: string) {
-    console.log({ id });
     return this.movieService.findOne(+id);
   }
 
