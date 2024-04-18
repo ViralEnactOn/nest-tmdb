@@ -6,6 +6,7 @@ import { MovieModule } from './movie/movie.module';
 import { KyselyModule } from 'nestjs-kysely';
 import { MysqlDialect } from 'kysely';
 import { createPool } from 'mysql2';
+import { UserModule } from './user/user.module';
 import appConfig from './config/app.config';
 
 @Module({
@@ -23,6 +24,7 @@ import appConfig from './config/app.config';
       }),
     }),
     MovieModule,
+    UserModule,
   ],
   controllers: [AppController],
   providers: [AppService],
